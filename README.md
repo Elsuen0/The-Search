@@ -42,7 +42,7 @@ npm run dev
 
 ## 📸 Screenshots
 
-_(À ajouter après déploiement)_
+Prochainement
 
 ## 🎓 Projet réalisé pour
 
