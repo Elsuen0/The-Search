@@ -24,15 +24,18 @@ const ApplicationsList = () => {
         totalItems: 0,
         itemsPerPage: 10
     });
+    const [selectedStatus, setSelectedStatus] = useState('ALL');
 
     useEffect(() => {
         fetchApplications();
-    }, []); // 🆕 On ajoutera [pagination.currentPage] plus tard
+    }, [selectedStatus]); // 🆕 On ajoutera [pagination.currentPage] plus tard
 
-    const fetchApplications = async (page = 1) => {
+    const fetchApplications = async (page = 1, status = 'ALL') => {
+        const filterStatus = status || selectedStatus;
         try {
             setLoading(true);
-            const response = await api.get(`/applications?page=${page}&limit=10`);
+            const statusParam = filterStatus !== 'ALL' ? `&status=${filterStatus}` : '';
+            const response = await api.get(`/applications?page=${page}&limit=10${statusParam}`);
 
             // 🆕 Extraction des données et pagination
             setApplications(response.data.data);  // ← Fix du bug !
@@ -73,14 +76,40 @@ const ApplicationsList = () => {
         }
     };
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
 
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">Applications</h1>
-                <Link
-                    to="/applications/new"
+                <div className="flex items-center gap-4">
+                    <h1 className="text-2xl font-semibold text-gray-900">Applications</h1>
+
+                    {/* 🆕 Filtre par statut */}
+                    <select
+                        value={selectedStatus}
+                        onChange={(e) => {
+                            setSelectedStatus(e.target.value);
+                            fetchApplications(1, e.target.value);
+                        }}
+                        className="block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    >
+                        <option value="ALL">All statuses</option>
+                        <option value="TO_APPLY">To Apply</option>
+                        <option value="APPLIED">Applied</option>
+                        <option value="FOLLOWED_UP">Followed Up</option>
+                        <option value="INTERVIEW">Interview</option>
+                        <option value="REJECTED">Rejected</option>
+                        <option value="OFFER_ACCEPTED">Offer Accepted</option>
+                    </select>
+                </div>
+
+                <Link to="/applications/new"
                     className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                     <HiPlus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
@@ -191,8 +220,8 @@ const ApplicationsList = () => {
                                         key={pageNum}
                                         onClick={() => goToPage(pageNum)}
                                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pageNum === pagination.currentPage
-                                                ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                                            ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                                             }`}
                                     >
                                         {pageNum}
