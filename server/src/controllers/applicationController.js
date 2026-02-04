@@ -46,17 +46,21 @@ exports.getApplications = async (req, res) => {
     // Exemple: page 1 → skip 0, page 2 → skip 10, page 3 → skip 20
 
     try {
-        // 🆕 Compte le total de candidatures (pour savoir combien de pages)
+        // 🆕 Construction du where avec filtre optionnel
+        const where = { userId };
+        if (req.query.status && req.query.status !== 'ALL') {
+            where.status = req.query.status;
+        }
+
         const totalCount = await prisma.jobApplication.count({
-            where: { userId },
+            where,
         });
 
-        // 🆕 Récupère seulement la page demandée
         const applications = await prisma.jobApplication.findMany({
-            where: { userId },
+            where,
             orderBy: { createdAt: 'desc' },
-            skip: skip,      // Saute les N premières
-            take: limit,     // Prend seulement 10
+            skip: skip,
+            take: limit,
         });
 
         // 🆕 Retourne les données + métadonnées de pagination
