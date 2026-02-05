@@ -2,7 +2,7 @@
 
 > Application fullstack de suivi de candidatures pour freelances et chercheurs d'emploi
 
-[🚀 Voir la démo](https://ton-url.vercel.app) | [📖 Documentation](#)
+[🚀 Voir la démo](https://the-search-eta.vercel.app) | [📖 Documentation](#)
 
 ![Screenshot](screenshot.png)
 
