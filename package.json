@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "api/index.js",
   "scripts": {
-    "build": "npx prisma generate",
+    "build": "npx prisma generate --schema=./server/prisma/schema.prisma",
     "install-all": "npm install && cd client && npm install"
   },
   "dependencies": {
