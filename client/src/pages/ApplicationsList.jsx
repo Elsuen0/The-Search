@@ -27,7 +27,7 @@ const ApplicationsList = () => {
     const [selectedStatus, setSelectedStatus] = useState('ALL');
 
     useEffect(() => {
-        fetchApplications();
+        fetchApplications(1, selectedStatus);
     }, [selectedStatus]); // 🆕 On ajoutera [pagination.currentPage] plus tard
 
     const fetchApplications = async (page = 1, status = 'ALL') => {
@@ -95,7 +95,6 @@ const ApplicationsList = () => {
                         value={selectedStatus}
                         onChange={(e) => {
                             setSelectedStatus(e.target.value);
-                            fetchApplications(1, e.target.value);
                         }}
                         className="block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     >
