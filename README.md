@@ -1,53 +1,26 @@
 # 🎯 Job Tracker SaaS
 
-Application fullstack de suivi de candidatures pour freelances et chercheurs d'emploi.
+> Application fullstack de suivi de candidatures pour freelances et chercheurs d'emploi
 
-## 🚀 Stack technique
+[🚀 Voir la démo](https://ton-url.vercel.app) | [📖 Documentation](#)
 
-- **Frontend** : React, Tailwind CSS, React Router
-- **Backend** : Node.js, Express
-- **Base de données** : PostgreSQL, Prisma ORM
-- **Auth** : JWT
-- **Validation** : Zod
-- **Deployment** : Vercel (frontend) + Railway (backend)
+![Screenshot](screenshot.png)
 
 ## ✨ Fonctionnalités
 
-- ✅ Authentification complète (register/login/JWT)
-- ✅ CRUD candidatures avec validation
-- ✅ Pagination des résultats
-- ✅ Système de statuts (To Apply, Applied, Interview, etc.)
-- ✅ Upload de fichiers (CV, lettres de motivation)
-- 🚧 Dashboard avec statistiques (en cours)
-- 🚧 Filtres et recherche avancée (en cours)
-- 🚧 Templates d'emails de relance (prévu)
+- 🔐 Authentification sécurisée (JWT)
+- 📝 CRUD candidatures avec validation
+- 📊 Dashboard avec statistiques (bientôt)
+- 🔍 Filtres et recherche avancée
+- 📄 Upload de fichiers (CV, lettres)
+- 📱 Responsive mobile
 
-## 🛠️ Installation locale
+## 🚀 Stack Technique
 
-### Backend
-```bash
-cd server
-npm install
-# Configurer .env avec DATABASE_URL et JWT_SECRET
-npx prisma migrate dev
-npm run dev
-```
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)
 
-### Frontend
-```bash
-cd client
-npm install
-npm run dev
-```
-
-## 📸 Screenshots
-
-Prochainement
-
-## 🎓 Projet réalisé pour
-
-Apprentissage fullstack et portfolio professionnel.
-
----
-
-⭐ **Star ce repo si tu le trouves utile !**
+...
