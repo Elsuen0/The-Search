@@ -26,6 +26,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "@types/node": "^25.2.0",
+    "nodemon": "^3.1.11",
+    "typescript": "^5.9.3"
   }
 }
