@@ -39,3 +39,7 @@ server/prisma/*.db-journal
 # Misc
 coverage/
 .cache/
+
+# Vercel
+.vercel
+.vercel/

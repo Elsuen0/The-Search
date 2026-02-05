@@ -1,0 +1,24 @@
+# Fichiers de développement
+node_modules
+.env
+.env.local
+
+# Fichiers serveur non nécessaires pour Vercel
+server/node_modules
+server/.env
+
+# Fichiers client de développement
+client/node_modules
+client/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Tests
+**/*.test.js
+**/*.spec.js
+
+# Documentation
+README.md
+docs/

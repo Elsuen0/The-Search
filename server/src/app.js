@@ -11,7 +11,37 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+
+// Configuration CORS flexible pour dev et production
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Autoriser les requêtes sans origin (comme les apps mobiles ou curl)
+        if (!origin) return callback(null, true);
+
+        // Liste des origines autorisées
+        const allowedOrigins = [
+            'http://localhost:5173', // Vite dev server
+            'http://localhost:3000', // Backend local
+            /\.vercel\.app$/, // Tous les domaines Vercel
+        ];
+
+        const isAllowed = allowedOrigins.some(allowed => {
+            if (allowed instanceof RegExp) {
+                return allowed.test(origin);
+            }
+            return allowed === origin;
+        });
+
+        if (isAllowed) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
