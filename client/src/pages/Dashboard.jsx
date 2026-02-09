@@ -24,18 +24,29 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
 
 const Dashboard = () => {
     const [stats, setStats] = useState({ total: 0, byStatus: {} });
+    const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchData = async () => {
             try {
-                const response = await api.get('/stats');
-                setStats(response.data);
+                // On récupère les deux types d'infos
+                const [statsRes, appsRes] = await Promise.all([
+                    api.get('/stats'),
+                    api.get('/applications?limit=5')
+                ]);
+
+                // On met à jour les deux états séparément
+                setStats(statsRes.data); // Met à jour les compteurs
+                setApplications(appsRes.data.data); // Met à jour la liste
             } catch (error) {
-                console.error('Error fetching stats:', error);
+                console.error('Erreur:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchStats();
+        fetchData();
     }, []);
 
     return (
@@ -71,8 +82,12 @@ const Dashboard = () => {
 
             <div className="mt-8">
                 <h2 className="text-lg leading-6 font-medium text-gray-900">Recent Activity</h2>
-                <div className="mt-4 bg-white shadow rounded-lg p-6">
-                    <p className="text-gray-500">No recent activity to display.</p>
+                <div className="mt-4 bg-white shadow rounded-lg">
+                    {applications.map(app => (
+                        <div key={app.id} className="p-4 border-b">
+                            {app.company} - {app.position}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
