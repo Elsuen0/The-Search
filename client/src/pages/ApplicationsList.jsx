@@ -116,62 +116,70 @@ const ApplicationsList = () => {
                 </Link>
             </div>
 
-            <div className="flex flex-col">
-                <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                        <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Company
-                                        </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Position
-                                        </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Date Applied
-                                        </th>
-                                        <th scope="col" className="relative px-6 py-3">
-                                            <span className="sr-only">Actions</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {applications.map((app) => (
-                                        <tr key={app.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{app.company}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-500">{app.position}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_COLORS[app.status] || 'bg-gray-100'}`}>
-                                                    {app.status.replace('_', ' ')}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {app.appliedDate ? format(new Date(app.appliedDate), 'MMM d, yyyy') : '-'}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <Link to={`/applications/${app.id}/edit`} className="text-indigo-600 hover:text-indigo-900 mr-4">
-                                                    <HiPencil className="h-5 w-5" />
+            <div className="flex flex-col md:flex-row gap-4 overflow-x-auto pb-6">
+                {[
+                    { title: 'À postuler', status: 'TO_APPLY', color: 'border-gray-400' },
+                    { title: 'Postulé', status: 'APPLIED', color: 'border-blue-500' },
+                    { title: 'Relancé', status: 'FOLLOWED_UP', color: 'border-yellow-500' },
+                    { title: 'Entretiens', status: 'INTERVIEW', color: 'border-purple-500' },
+                    { title: 'Terminé', status: 'REJECTED', color: 'border-red-500' }
+                ].map((column) => {
+                    // On filtre les applications pour cette colonne précise
+                    const columnApps = applications.filter(app => app.status === column.status);
+
+                    return (
+                        <div key={column.status} className="flex-1 min-w-[280px] bg-gray-100 rounded-xl p-3 shadow-inner">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase mb-4 flex justify-between items-center px-1">
+                                {column.title}
+                                <span className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full text-[10px]">
+                                    {columnApps.length}
+                                </span>
+                            </h3>
+
+                            <div className="space-y-3">
+                                {columnApps.map((app) => (
+                                    <div
+                                        key={app.id}
+                                        className={`bg-white p-4 rounded-lg shadow-sm border-t-4 ${column.color} hover:shadow-md transition-shadow group`}
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="font-bold text-gray-900 leading-tight">{app.company}</h4>
+                                                <p className="text-sm text-gray-600 mt-1">{app.position}</p>
+                                            </div>
+
+                                            {/* Actions rapides au survol */}
+                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Link to={`/applications/${app.id}/edit`} className="p-1 text-indigo-600 hover:bg-indigo-50 rounded">
+                                                    <HiPencil className="h-4 w-4" />
                                                 </Link>
-                                                <button onClick={() => handleDelete(app.id)} className="text-red-600 hover:text-red-900">
-                                                    <HiTrash className="h-5 w-5" />
+                                                <button onClick={() => handleDelete(app.id)} className="p-1 text-red-600 hover:bg-red-50 rounded">
+                                                    <HiTrash className="h-4 w-4" />
                                                 </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 pt-3 border-t border-gray-50 flex justify-between items-center">
+                                            <span className="text-[10px] text-gray-400">
+                                                {app.appliedDate ? format(new Date(app.appliedDate), 'dd MMM') : 'Pas de date'}
+                                            </span>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[app.status]}`}>
+                                                {app.status.replace('_', ' ')}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {columnApps.length === 0 && (
+                                    <div className="border-2 border-dashed border-gray-200 rounded-lg py-8 text-center">
+                                        <p className="text-xs text-gray-400 italic">Aucune fiche</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    );
+                })}
+                {/* --- FIN DE LA VUE KANBAN --- */}
 
                 {/* 🆕 CONTRÔLES DE PAGINATION */}
                 <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
