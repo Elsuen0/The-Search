@@ -64,19 +64,19 @@ const Dashboard = () => {
                     title="Interviews"
                     value={stats.byStatus['INTERVIEW'] || 0}
                     icon={HiClock}
-                    color="yellow"
+                    color="purple"
                 />
                 <StatCard
                     title="Offers"
                     value={stats.byStatus['OFFER_ACCEPTED'] || 0}
                     icon={HiCheckCircle}
-                    color="green"
+                    color="emerald"
                 />
                 <StatCard
                     title="Rejections"
                     value={stats.byStatus['REJECTED'] || 0}
                     icon={HiXCircle}
-                    color="red"
+                    color="rose"
                 />
             </div>
 
