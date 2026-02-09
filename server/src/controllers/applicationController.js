@@ -36,46 +36,46 @@ exports.createApplication = async (req, res) => {
 
 exports.getApplications = async (req, res) => {
     const userId = req.userId;
-
-    // 🆕 Récupère page et limit depuis la query string
-    const page = parseInt(req.query.page) || 1;  // Par défaut page 1
-    const limit = parseInt(req.query.limit) || 10; // Par défaut 10 par page
-
-    // 🆕 Calcul du skip (combien on saute)
-    const skip = (page - 1) * limit;
-    // Exemple: page 1 → skip 0, page 2 → skip 10, page 3 → skip 20
+    const isKanban = req.query.view === 'kanban';
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
     try {
-        // 🆕 Construction du where avec filtre optionnel
         const where = { userId };
         if (req.query.status && req.query.status !== 'ALL') {
             where.status = req.query.status;
         }
 
-        const totalCount = await prisma.jobApplication.count({
-            where,
-        });
+        // Si Kanban, on prend tout (ou une limite très large si besoin)
+        // Sinon on pagine
+        const [applications, total] = await Promise.all([
+            prisma.jobApplication.findMany({
+                where,
+                orderBy: { updatedAt: 'desc' },
+                ...(isKanban ? {} : {
+                    skip: (page - 1) * limit,
+                    take: limit
+                })
+            }),
+            prisma.jobApplication.count({ where })
+        ]);
 
-        const applications = await prisma.jobApplication.findMany({
-            where,
-            orderBy: { createdAt: 'desc' },
-            skip: skip,
-            take: limit,
-        });
+        if (isKanban) {
+            return res.json({ data: applications });
+        }
 
-        // 🆕 Retourne les données + métadonnées de pagination
         res.json({
             data: applications,
             pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(totalCount / limit),
-                totalItems: totalCount,
-                itemsPerPage: limit,
-            },
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
         });
     } catch (error) {
         console.error('Get applications error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 };
 
@@ -116,20 +116,7 @@ exports.updateApplication = async (req, res) => {
 
         const updatedApp = await prisma.jobApplication.update({
             where: { id: parseInt(id) },
-            data: {
-                company: validatedData.company,
-                position: validatedData.position,
-                status: validatedData.status,
-                // Only update dates if they are provided in the validated data (could be null or string)
-                // If undefined (not present), Prisma ignores it.
-                appliedDate: validatedData.appliedDate !== undefined
-                    ? (validatedData.appliedDate ? new Date(validatedData.appliedDate) : null)
-                    : undefined,
-                reminderDate: validatedData.reminderDate !== undefined
-                    ? (validatedData.reminderDate ? new Date(validatedData.reminderDate) : null)
-                    : undefined,
-                notes: validatedData.notes,
-            },
+            data: validatedData,
         });
         res.json(updatedApp);
     } catch (error) {
