@@ -242,103 +242,48 @@ const ApplicationsList = () => {
 
                         <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
 
-                            <table className="min-w-full divide-y divide-gray-200">
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
+                                {[
+                                    { title: 'À postuler', status: 'TO_APPLY' },
+                                    { title: 'Postulé', status: 'APPLIED' },
+                                    { title: 'Relance', status: 'FOLLOWED_UP' },
+                                    { title: 'Entretien', status: 'INTERVIEW' },
+                                    { title: 'Finis', status: 'FINISH' } // Adapte selon tes statuts réels
+                                ].map((column) => (
+                                    <div key={column.status} className="bg-gray-50 rounded-lg border border-gray-200 flex flex-col h-full">
+                                        {/* Entête de colonne fixe */}
+                                        <div className="p-3 border-b border-gray-200 bg-white rounded-t-lg">
+                                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider text-center">
+                                                {column.title}
+                                            </h3>
+                                        </div>
 
-                                <thead className="bg-gray-50">
+                                        {/* Zone des cartes */}
+                                        <div className="p-2 space-y-3 min-h-[200px]">
+                                            {applications
+                                                .filter(app => app.status === column.status || (column.status === 'FINISH' && ['REJECTED', 'OFFER_ACCEPTED'].includes(app.status)))
+                                                .map((app) => (
+                                                    <div key={app.id} className="bg-white p-3 rounded shadow-sm border border-gray-200 group relative">
+                                                        <div className="flex flex-col gap-1">
+                                                            <span className="font-bold text-gray-900 text-sm truncate">{app.company}</span>
+                                                            <span className="text-xs text-gray-500 truncate">{app.position}</span>
+                                                        </div>
 
-                                    <tr>
-
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-
-                                            Company
-
-                                        </th>
-
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-
-                                            Position
-
-                                        </th>
-
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-
-                                            Status
-
-                                        </th>
-
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-
-                                            Date Applied
-
-                                        </th>
-
-                                        <th scope="col" className="relative px-6 py-3">
-
-                                            <span className="sr-only">Actions</span>
-
-                                        </th>
-
-                                    </tr>
-
-                                </thead>
-
-                                <tbody className="bg-white divide-y divide-gray-200">
-
-                                    {applications.map((app) => (
-
-                                        <tr key={app.id}>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-
-                                                <div className="text-sm font-medium text-gray-900">{app.company}</div>
-
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-
-                                                <div className="text-sm text-gray-500">{app.position}</div>
-
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap">
-
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_COLORS[app.status] || 'bg-gray-100'}`}>
-
-                                                    {app.status.replace('_', ' ')}
-
-                                                </span>
-
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-
-                                                {app.appliedDate ? format(new Date(app.appliedDate), 'MMM d, yyyy') : '-'}
-
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-
-                                                <Link to={`/applications/${app.id}/edit`} className="text-indigo-600 hover:text-indigo-900 mr-4">
-
-                                                    <HiPencil className="h-5 w-5" />
-
-                                                </Link>
-
-                                                <button onClick={() => handleDelete(app.id)} className="text-red-600 hover:text-red-900">
-
-                                                    <HiTrash className="h-5 w-5" />
-
-                                                </button>
-
-                                            </td>
-
-                                        </tr>
-
-                                    ))}
-
-                                </tbody>
-
-                            </table>
+                                                        {/* Boutons d'action (apparaissent au survol) */}
+                                                        <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity justify-end border-t pt-2">
+                                                            <Link to={`/applications/${app.id}/edit`} className="text-indigo-600">
+                                                                <HiPencil className="h-4 w-4" />
+                                                            </Link>
+                                                            <button onClick={() => handleDelete(app.id)} className="text-red-600">
+                                                                <HiTrash className="h-4 w-4" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
 
                         </div>
 
