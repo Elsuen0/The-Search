@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { HiPlus, HiPencil, HiTrash, HiExternalLink } from 'react-icons/hi';
+import { HiPlus, HiPencil, HiTrash, HiExternalLink, HiSearch } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -8,6 +8,15 @@ const ApplicationsList = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedStatus, setSelectedStatus] = useState('ALL');
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredApplications = applications.filter(app => {
+        const search = searchTerm.toLowerCase();
+        return (
+            app.company.toLowerCase().includes(search) ||
+            app.position.toLowerCase().includes(search)
+        );
+    });
 
     useEffect(() => {
         fetchApplications(selectedStatus);
@@ -70,7 +79,26 @@ const ApplicationsList = () => {
         <div className="max-w-full overflow-x-hidden">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-4">
-                    <h1 className="text-2xl font-semibold text-gray-900">Tableau de bord</h1>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
+                        <p className="text-sm text-gray-500">Gérez vos {applications.length} candidatures</p>
+                    </div>
+
+                    <div className="flex flex-1 w-full md:w-auto max-w-md gap-3">
+                        {/* Barre de recherche */}
+                        <div className="relative flex-1">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <HiSearch className="h-5 w-5 text-gray-400" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Rechercher une entreprise ou un poste..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                            />
+                        </div>
+                    </div>
 
                     <select
                         value={selectedStatus}
@@ -104,7 +132,7 @@ const ApplicationsList = () => {
                     { title: 'Entretien', status: 'INTERVIEW' },
                     { title: 'Terminé', status: 'FINISH' }
                 ].map((column) => {
-                    const columnApps = applications.filter(app =>
+                    const columnApps = filteredApplications.filter(app =>
                         app.status === column.status ||
                         (column.status === 'FINISH' && ['REJECTED', 'OFFER_ACCEPTED'].includes(app.status))
                     );
