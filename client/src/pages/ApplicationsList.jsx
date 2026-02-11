@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { HiPlus, HiPencil, HiTrash, HiExternalLink, HiSearch } from 'react-icons/hi';
+import { HiPlus, HiPencil, HiTrash, HiExternalLink, HiSearch, HiBell } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -150,53 +150,70 @@ const ApplicationsList = () => {
                             </div>
 
                             {/* Zone des cartes avec effet de chevauchement */}
+
                             <div className="p-2 flex flex-col -space-y-12 pb-20">
-                                {columnApps.map((app, index) => (
-                                    <div
-                                        key={app.id}
-                                        style={{ zIndex: index }}
-                                        className="group relative bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-300 transform hover:-translate-y-6 hover:z-[100] cursor-pointer"
-                                    >
-                                        <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${statusColors[app.status] || 'bg-indigo-400'}`} />
+                                {columnApps.map((app, index) => {
+                                    // --- LOGIQUE DE CALCUL ---
+                                    const lastDate = new Date(app.updatedAt || app.createdAt);
+                                    const daysSinceUpdate = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
+                                    // On cible uniquement les candidatures en attente (APPLIED) de plus de 7 jours
+                                    const isStale = daysSinceUpdate >= 7 && app.status === 'APPLIED';
 
-                                        <div className="pl-2">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-800 uppercase tracking-wider">
-                                                    {app.contractType || 'CDI'}
-                                                </span>
-                                                <span className="text-[10px] text-gray-400 uppercase font-semibold">
-                                                    {app.appliedDate ? new Date(app.appliedDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : '-'}
-                                                </span>
-                                            </div>
+                                    return (
+                                        <div
+                                            key={app.id}
+                                            style={{ zIndex: index }}
+                                            className="group relative bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-300 transform hover:-translate-y-6 hover:z-[100] cursor-pointer"
+                                        >
+                                            <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${statusColors[app.status] || 'bg-indigo-400'}`} />
 
-                                            <h4 className="font-bold text-gray-900 text-sm truncate group-hover:text-indigo-600 transition-colors">
-                                                {app.company}
-                                            </h4>
-                                            <p className="text-xs text-gray-500 truncate mb-3 italic">
-                                                {app.position}
-                                            </p>
-
-                                            <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                                                <div>
-                                                    {app.offerUrl && (
-                                                        <a href={app.offerUrl} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-indigo-500 transition-colors">
-                                                            <HiExternalLink className="h-4 w-4" />
-                                                        </a>
-                                                    )}
+                                            <div className="pl-2">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-800 uppercase tracking-wider">
+                                                        {app.contractType || 'CDI'}
+                                                    </span>
+                                                    <span className={`text-[10px] uppercase font-semibold ${isStale ? 'text-orange-600' : 'text-gray-400'}`}>
+                                                        {app.appliedDate ? new Date(app.appliedDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : '-'}
+                                                    </span>
                                                 </div>
 
-                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <Link to={`/applications/${app.id}/edit`} className="p-1.5 hover:bg-indigo-50 rounded-lg text-indigo-600">
-                                                        <HiPencil className="h-4 w-4" />
-                                                    </Link>
-                                                    <button onClick={() => handleDelete(app.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-red-600">
-                                                        <HiTrash className="h-4 w-4" />
-                                                    </button>
+                                                <h4 className="font-bold text-gray-900 text-sm truncate group-hover:text-indigo-600 transition-colors">
+                                                    {app.company}
+                                                </h4>
+                                                <p className="text-xs text-gray-500 truncate mb-1 italic">
+                                                    {app.position}
+                                                </p>
+
+                                                {/* --- LE BADGE D'ALERTE --- */}
+                                                {isStale && (
+                                                    <div className="mb-3 flex items-center gap-1 text-[10px] font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded-md border border-orange-200 animate-pulse">
+                                                        <HiBell className="h-3 w-3" />
+                                                        RELANCE (J+{daysSinceUpdate})
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                                                    <div>
+                                                        {app.offerUrl && (
+                                                            <a href={app.offerUrl} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-indigo-500 transition-colors">
+                                                                <HiExternalLink className="h-4 w-4" />
+                                                            </a>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Link to={`/applications/${app.id}/edit`} className="p-1.5 hover:bg-indigo-50 rounded-lg text-indigo-600">
+                                                            <HiPencil className="h-4 w-4" />
+                                                        </Link>
+                                                        <button onClick={() => handleDelete(app.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-red-600">
+                                                            <HiTrash className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     );
