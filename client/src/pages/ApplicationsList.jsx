@@ -75,6 +75,19 @@ const ApplicationsList = () => {
         );
     }
 
+    const stats = {
+        total: applications.length,
+        interview: applications.filter(app => app.status === 'INTERVIEW').length,
+        pendingRelance: applications.filter(app => {
+            const lastDate = new Date(app.updatedAt || app.createdAt);
+            const days = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
+            return days >= 7 && app.status === 'APPLIED';
+        }).length,
+        successRate: applications.length > 0
+            ? Math.round((applications.filter(app => ['INTERVIEW', 'OFFER_ACCEPTED'].includes(app.status)).length / applications.length) * 100)
+            : 0
+    };
+
     return (
         <div className="max-w-full overflow-x-hidden">
             <div className="flex justify-between items-center mb-6">
@@ -82,6 +95,35 @@ const ApplicationsList = () => {
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
                         <p className="text-sm text-gray-500">Gérez vos {applications.length} candidatures</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        {/* Carte Total */}
+                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                            <p className="text-xs font-medium text-gray-500 uppercase">Total Candidatures</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                        </div>
+
+                        {/* Carte Entretiens */}
+                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm border-l-4 border-l-green-500">
+                            <p className="text-xs font-medium text-gray-500 uppercase">Entretiens</p>
+                            <p className="text-2xl font-bold text-green-600">{stats.interview}</p>
+                        </div>
+
+                        {/* Carte Relances */}
+                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm border-l-4 border-l-orange-500">
+                            <p className="text-xs font-medium text-gray-500 uppercase">À relancer</p>
+                            <p className="text-2xl font-bold text-orange-600">{stats.pendingRelance}</p>
+                        </div>
+
+                        {/* Carte Taux de succès */}
+                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                            <p className="text-xs font-medium text-gray-500 uppercase">Taux de réponse</p>
+                            <div className="flex items-baseline gap-2">
+                                <p className="text-2xl font-bold text-indigo-600">{stats.successRate}%</p>
+                                <span className="text-[10px] text-gray-400">vs total</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="flex flex-1 w-full md:w-auto max-w-md gap-3">
