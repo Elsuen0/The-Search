@@ -4,8 +4,6 @@ import api from '../services/api';
 import { HiPlus, HiPencil, HiTrash, HiExternalLink, HiSearch, HiBell } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 // --- 2. COMPOSANT PRINCIPAL ---
 const ApplicationsList = () => {
@@ -84,60 +82,14 @@ const ApplicationsList = () => {
         );
     }
 
-    // -- PRÉPARATION DES DONNÉES (Stats & Charts) --
-    const stats = {
-        total: applications.length,
-        interview: applications.filter(app => app.status === 'INTERVIEW').length,
-        pendingRelance: applications.filter(app => {
-            const lastDate = new Date(app.updatedAt || app.createdAt);
-            const days = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
-            return days >= 7 && app.status === 'APPLIED';
-        }).length,
-        successRate: applications.length > 0
-            ? Math.round((applications.filter(app => ['INTERVIEW', 'OFFER_ACCEPTED'].includes(app.status)).length / applications.length) * 100)
-            : 0
-    };
-
-    const dataChart = [
-        { name: 'À postuler', value: applications.filter(app => app.status === 'TO_APPLY').length, fill: '#94A3B8' },
-        { name: 'Postulé', value: applications.filter(app => app.status === 'APPLIED').length, fill: '#60A5FA' },
-        { name: 'Relance', value: applications.filter(app => app.status === 'FOLLOWED_UP').length, fill: '#FBBF24' },
-        { name: 'Entretien', value: applications.filter(app => app.status === 'INTERVIEW').length, fill: '#A855F7' },
-        { name: 'Offre', value: applications.filter(app => app.status === 'OFFER_ACCEPTED').length, fill: '#10B981' },
-        { name: 'Refusé', value: applications.filter(app => app.status === 'REJECTED').length, fill: '#F43F5E' }
-    ].filter(item => item.value > 0);
-
-    const last7Days = [...Array(7)].map((_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: 'short'
-        });
-
-        const count = applications.filter(app => {
-            const appDate = new Date(app.appliedDate || app.createdAt).toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: 'short'
-            });
-            return appDate === dateStr;
-        }).length;
-
-        return {
-            name: dateStr,
-            candidatures: count
-        };
-    }).reverse();
-
     // --- 3. RENDU DE L'INTERFACE ---
     return (
         <div className="max-w-[1600px] mx-auto p-4 md:p-8">
-            {/* Header Section */}
             {/* EN-TÊTE : Titre et Bouton Ajout */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight">Tableau de bord</h1>
-                    <p className="text-gray-500 font-medium">Gérez vos {applications.length} candidatures en cours</p>
+                    <h1 className="text-3xl font-black text-gray-900 tracking-tight">Suivi des candidatures</h1>
+                    <p className="text-gray-500 font-medium">Gérez votre pipeline de recrutement en temps réel</p>
                 </div>
                 <Link to="/applications/new"
                     className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl shadow-indigo-100 hover:scale-[1.02] active:scale-[0.98]">
@@ -146,124 +98,8 @@ const ApplicationsList = () => {
                 </Link>
             </div>
 
-            {/* Metrics and Chart Grid */}
-            {/* SECTION STATS : Cartes et Graphiques */}
-            {/* SECTION STATS : Cartes et Graphiques */}
-            <div className="flex flex-col gap-8 mb-12">
-                {/* Stats Cards Row */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                        <div className="flex items-center justify-between mb-1">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total</p>
-                            <span className="p-1 bg-gray-50 text-gray-400 rounded-lg"><HiSearch className="h-3 w-3" /></span>
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                            <p className="text-2xl font-black text-gray-900">{stats.total}</p>
-                            <span className="text-[10px] text-gray-400 font-bold italic">postes</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm border-l-4 border-l-green-500 hover:shadow-md transition-all">
-                        <div className="flex items-center justify-between mb-1">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Entretiens</p>
-                            <span className="p-1 bg-green-50 text-green-600 rounded-lg"><HiBell className="h-3 w-3" /></span>
-                        </div>
-                        <p className="text-2xl font-black text-green-600">{stats.interview}</p>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm border-l-4 border-l-orange-500 hover:shadow-md transition-all">
-                        <div className="flex items-center justify-between mb-1">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">À relancer</p>
-                            <span className="p-1 bg-orange-50 text-orange-600 rounded-lg"><HiBell className="h-3 w-3" /></span>
-                        </div>
-                        <p className="text-2xl font-black text-orange-600">{stats.pendingRelance}</p>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                        <div className="flex items-center justify-between mb-1">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Succès</p>
-                            <span className="p-1 bg-indigo-50 text-indigo-600 rounded-lg"><HiExternalLink className="h-3 w-3" /></span>
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                            <p className="text-2xl font-black text-indigo-600">{stats.successRate}%</p>
-                            <span className="text-[10px] text-gray-400 font-bold italic">taux</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Charts Row */}
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-                    {/* DONUTS */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center">
-                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6 w-full text-center">Distribution des statuts</h3>
-                        <div className="h-72 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={dataChart}
-                                        innerRadius={65}
-                                        outerRadius={90}
-                                        paddingAngle={5}
-                                        cornerRadius={10}
-                                        dataKey="value"
-                                    >
-                                        {dataChart.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                                        itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                                    />
-                                    <Legend
-                                        iconType="circle"
-                                        layout="horizontal"
-                                        verticalAlign="bottom"
-                                        align="center"
-                                        wrapperStyle={{ paddingTop: '20px', fontSize: '11px', fontWeight: 'bold' }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* COURBE */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6 w-full text-center">Activité (7 derniers jours)</h3>
-                        <div className="h-72 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={last7Days}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                    <XAxis
-                                        dataKey="name"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 600 }}
-                                        dy={10}
-                                    />
-                                    <YAxis hide={true} />
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                                        itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="candidatures"
-                                        stroke="#6366f1"
-                                        strokeWidth={4}
-                                        dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
-                                        activeDot={{ r: 6, strokeWidth: 0 }}
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Filter and Search Bar */}
             {/* FILTRES & RECHERCHE */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-10 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
                 <div className="relative flex-1 w-full max-w-2xl">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <HiSearch className="h-5 w-5 text-gray-400" />
@@ -295,7 +131,6 @@ const ApplicationsList = () => {
                 </div>
             </div>
 
-            {/* Grille Kanban */}
             {/* GRILLE KANBAN (Colonnes de statut) */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start pb-10">
                 {[
@@ -311,70 +146,65 @@ const ApplicationsList = () => {
                     );
 
                     return (
-                        <div key={column.status} className={`bg-gray-100/50 rounded-lg border border-gray-200 border-t-4 ${columnColors[column.status]} flex flex-col min-h-[500px]`}>
+                        <div key={column.status} className={`bg-gray-100/50 rounded-2xl border border-gray-100 border-t-4 ${columnColors[column.status]} flex flex-col min-h-[600px] transition-all`}>
                             {/* Header de colonne avec Compteur */}
-                            <div className="p-3 border-b border-gray-200 bg-white rounded-t-sm flex justify-between items-center shadow-sm">
+                            <div className="p-4 border-b border-gray-100 bg-white rounded-t-xl flex justify-between items-center shadow-sm">
                                 <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                                     {column.title}
                                 </h3>
-                                <span className="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                                <div className="bg-gray-100 text-gray-600 text-[10px] px-2.5 py-1 rounded-full font-black">
                                     {columnApps.length}
-                                </span>
+                                </div>
                             </div>
 
-                            {/* Zone des cartes avec effet de chevauchement */}
-
-                            <div className="p-2 flex flex-col -space-y-8 pb-20">
-                                {columnApps.map((app, index) => {
-                                    // --- LOGIQUE DE CALCUL ---
+                            {/* Zone des cartes */}
+                            <div className="p-3 flex flex-col gap-4">
+                                {columnApps.map((app) => {
                                     const lastDate = new Date(app.updatedAt || app.createdAt);
                                     const daysSinceUpdate = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
-                                    // On cible uniquement les candidatures en attente (APPLIED) de plus de 7 jours
                                     const isStale = daysSinceUpdate >= 7 && app.status === 'APPLIED';
 
                                     return (
                                         <div
                                             key={app.id}
-                                            style={{ zIndex: index }}
-                                            className="group relative bg-white p-5 min-h-[160px] flex flex-col justify-between rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-300 transform hover:-translate-y-6 hover:z-[100] cursor-pointer"
+                                            className="group relative bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 cursor-pointer"
                                         >
-                                            <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${statusColors[app.status] || 'bg-indigo-400'}`} />
+                                            <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${statusColors[app.status] || 'bg-indigo-400'}`} />
 
                                             <div className="pl-2">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-800 uppercase tracking-wider">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold bg-indigo-50 text-indigo-600 uppercase tracking-wider">
                                                         {app.contractType || 'CDI'}
                                                     </span>
-                                                    <span className={`text-[10px] uppercase font-semibold ${isStale ? 'text-orange-600' : 'text-gray-400'}`}>
+                                                    <span className={`text-[10px] uppercase font-bold ${isStale ? 'text-orange-600' : 'text-gray-400'}`}>
                                                         {app.appliedDate ? new Date(app.appliedDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : '-'}
                                                     </span>
                                                 </div>
 
-                                                <h4 className="font-bold text-gray-900 text-sm truncate group-hover:text-indigo-600 transition-colors">
+                                                <h4 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-indigo-600 transition-colors">
                                                     {app.company}
                                                 </h4>
-                                                <p className="text-xs text-gray-500 truncate mb-1 italic">
+                                                <p className="text-xs text-gray-500 truncate mb-4 italic">
                                                     {app.position}
                                                 </p>
 
-                                                {/* --- LE BADGE D'ALERTE --- */}
                                                 {isStale && (
-                                                    <div className="mb-3 flex items-center gap-1 text-[10px] font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded-md border border-orange-200 animate-pulse">
+                                                    <div className="mb-4 flex items-center gap-1.5 text-[10px] font-bold text-orange-600 bg-orange-50 px-3 py-2 rounded-xl border border-orange-100 animate-pulse">
                                                         <HiBell className="h-3 w-3" />
-                                                        RELANCE (J+{daysSinceUpdate})
+                                                        RELANCE J+{daysSinceUpdate}
                                                     </div>
                                                 )}
 
-                                                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                                                    <div>
+                                                <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                                                    <div className="flex gap-2">
                                                         {app.offerUrl && (
-                                                            <a href={app.offerUrl} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-indigo-500 transition-colors">
+                                                            <a href={app.offerUrl} target="_blank" rel="noreferrer" className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
                                                                 <HiExternalLink className="h-4 w-4" />
                                                             </a>
                                                         )}
                                                     </div>
 
-                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                                                         <Link to={`/applications/${app.id}/edit`} className="p-1.5 hover:bg-indigo-50 rounded-lg text-indigo-600">
                                                             <HiPencil className="h-4 w-4" />
                                                         </Link>
