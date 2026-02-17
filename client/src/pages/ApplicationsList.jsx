@@ -1,16 +1,21 @@
+// --- 1. IMPORTS ---
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { HiPlus, HiPencil, HiTrash, HiExternalLink, HiSearch, HiBell } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 
+// --- 2. COMPOSANT PRINCIPAL ---
 const ApplicationsList = () => {
+    // -- ÉTATS LOCAUX --
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedStatus, setSelectedStatus] = useState('ALL');
     const [searchTerm, setSearchTerm] = useState('');
 
+    // -- LOGIQUE DE FILTRAGE --
     const filteredApplications = applications.filter(app => {
         const search = searchTerm.toLowerCase();
         return (
@@ -19,10 +24,12 @@ const ApplicationsList = () => {
         );
     });
 
+    // -- EFFETS (Chargement initial) --
     useEffect(() => {
         fetchApplications(selectedStatus);
     }, [selectedStatus]);
 
+    // -- ACTIONS & APPELS API --
     const fetchApplications = async (status = 'ALL') => {
         try {
             setLoading(true);
@@ -51,6 +58,7 @@ const ApplicationsList = () => {
         }
     };
 
+    // -- CONFIGURATION VISUELLE --
     const statusColors = {
         'TO_APPLY': 'bg-slate-400',
         'APPLIED': 'bg-blue-400',
@@ -76,6 +84,7 @@ const ApplicationsList = () => {
         );
     }
 
+    // -- PRÉPARATION DES DONNÉES (Stats & Charts) --
     const stats = {
         total: applications.length,
         interview: applications.filter(app => app.status === 'INTERVIEW').length,
@@ -98,9 +107,33 @@ const ApplicationsList = () => {
         { name: 'Refusé', value: applications.filter(app => app.status === 'REJECTED').length, fill: '#F43F5E' }
     ].filter(item => item.value > 0);
 
+    const last7Days = [...Array(7)].map((_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: 'short'
+        });
+
+        const count = applications.filter(app => {
+            const appDate = new Date(app.appliedDate || app.createdAt).toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: 'short'
+            });
+            return appDate === dateStr;
+        }).length;
+
+        return {
+            name: dateStr,
+            candidatures: count
+        };
+    }).reverse();
+
+    // --- 3. RENDU DE L'INTERFACE ---
     return (
         <div className="max-w-[1600px] mx-auto p-4 md:p-8">
             {/* Header Section */}
+            {/* EN-TÊTE : Titre et Bouton Ajout */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                 <div>
                     <h1 className="text-3xl font-black text-gray-900 tracking-tight">Tableau de bord</h1>
@@ -114,81 +147,122 @@ const ApplicationsList = () => {
             </div>
 
             {/* Metrics and Chart Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-                {/* Stats Cards */}
-                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                        <div className="flex items-center justify-between mb-2">
+            {/* SECTION STATS : Cartes et Graphiques */}
+            {/* SECTION STATS : Cartes et Graphiques */}
+            <div className="flex flex-col gap-8 mb-12">
+                {/* Stats Cards Row */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-1">
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total</p>
-                            <span className="p-1.5 bg-gray-50 text-gray-400 rounded-xl"><HiSearch className="h-4 w-4" /></span>
+                            <span className="p-1 bg-gray-50 text-gray-400 rounded-lg"><HiSearch className="h-3 w-3" /></span>
                         </div>
                         <div className="flex items-baseline gap-1">
-                            <p className="text-3xl font-black text-gray-900">{stats.total}</p>
-                            <span className="text-[10px] text-gray-400 font-bold">Postes</span>
+                            <p className="text-2xl font-black text-gray-900">{stats.total}</p>
+                            <span className="text-[10px] text-gray-400 font-bold italic">postes</span>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm border-l-4 border-l-green-500 hover:shadow-md transition-all">
-                        <div className="flex items-center justify-between mb-2">
+                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm border-l-4 border-l-green-500 hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-1">
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Entretiens</p>
-                            <span className="p-1.5 bg-green-50 text-green-600 rounded-xl"><HiBell className="h-4 w-4" /></span>
+                            <span className="p-1 bg-green-50 text-green-600 rounded-lg"><HiBell className="h-3 w-3" /></span>
                         </div>
-                        <p className="text-3xl font-black text-green-600">{stats.interview}</p>
+                        <p className="text-2xl font-black text-green-600">{stats.interview}</p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm border-l-4 border-l-orange-500 hover:shadow-md transition-all">
-                        <div className="flex items-center justify-between mb-2">
+                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm border-l-4 border-l-orange-500 hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-1">
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">À relancer</p>
-                            <span className="p-1.5 bg-orange-50 text-orange-600 rounded-xl"><HiBell className="h-4 w-4" /></span>
+                            <span className="p-1 bg-orange-50 text-orange-600 rounded-lg"><HiBell className="h-3 w-3" /></span>
                         </div>
-                        <p className="text-3xl font-black text-orange-600">{stats.pendingRelance}</p>
+                        <p className="text-2xl font-black text-orange-600">{stats.pendingRelance}</p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                        <div className="flex items-center justify-between mb-2">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Taux de succès</p>
-                            <span className="p-1.5 bg-indigo-50 text-indigo-600 rounded-xl"><HiExternalLink className="h-4 w-4" /></span>
+                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Succès</p>
+                            <span className="p-1 bg-indigo-50 text-indigo-600 rounded-lg"><HiExternalLink className="h-3 w-3" /></span>
                         </div>
                         <div className="flex items-baseline gap-1">
-                            <p className="text-3xl font-black text-indigo-600">{stats.successRate}%</p>
-                            <span className="text-[10px] text-gray-400 font-bold">vs total</span>
+                            <p className="text-2xl font-black text-indigo-600">{stats.successRate}%</p>
+                            <span className="text-[10px] text-gray-400 font-bold italic">taux</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Distribution Chart */}
-                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center justify-between h-full">
-                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 w-full">Distribution</h3>
-                    <div className="h-64 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={dataChart}
-                                    innerRadius={55}
-                                    outerRadius={75}
-                                    paddingAngle={5}
-                                    cornerRadius={6}
-                                    dataKey="value"
-                                >
-                                    {dataChart.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                                    itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                                />
-                                <Legend
-                                    iconType="circle"
-                                    wrapperStyle={{ paddingTop: '20px' }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
+                {/* Charts Row */}
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+                    {/* DONUTS */}
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center">
+                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6 w-full text-center">Distribution des statuts</h3>
+                        <div className="h-72 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={dataChart}
+                                        innerRadius={65}
+                                        outerRadius={90}
+                                        paddingAngle={5}
+                                        cornerRadius={10}
+                                        dataKey="value"
+                                    >
+                                        {dataChart.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                                        itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                                    />
+                                    <Legend
+                                        iconType="circle"
+                                        layout="horizontal"
+                                        verticalAlign="bottom"
+                                        align="center"
+                                        wrapperStyle={{ paddingTop: '20px', fontSize: '11px', fontWeight: 'bold' }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* COURBE */}
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6 w-full text-center">Activité (7 derniers jours)</h3>
+                        <div className="h-72 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={last7Days}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                    <XAxis
+                                        dataKey="name"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 600 }}
+                                        dy={10}
+                                    />
+                                    <YAxis hide={true} />
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                                        itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="candidatures"
+                                        stroke="#6366f1"
+                                        strokeWidth={4}
+                                        dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
+                                        activeDot={{ r: 6, strokeWidth: 0 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Filter and Search Bar */}
+            {/* FILTRES & RECHERCHE */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-10 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
                 <div className="relative flex-1 w-full max-w-2xl">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -222,6 +296,7 @@ const ApplicationsList = () => {
             </div>
 
             {/* Grille Kanban */}
+            {/* GRILLE KANBAN (Colonnes de statut) */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start pb-10">
                 {[
                     { title: 'À postuler', status: 'TO_APPLY' },

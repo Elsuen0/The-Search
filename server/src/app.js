@@ -1,3 +1,4 @@
+// --- 1. IMPORTS & DEPENDANCES ---
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -9,7 +10,7 @@ const statsRoutes = require('./routes/statsRoutes');
 
 const app = express();
 
-// Middleware
+// --- 2. CONFIGURATION & MIDDLEWARES ---
 app.use(helmet());
 
 // Configuration CORS flexible pour dev et production
@@ -44,7 +45,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Routes
+// --- 3. DÉFINITION DES ROUTES ---
 app.use('/api/auth', authRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/stats', statsRoutes);

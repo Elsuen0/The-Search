@@ -1,7 +1,9 @@
+// --- 1. IMPORTS ---
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { HiBriefcase, HiCheckCircle, HiXCircle, HiClock } from 'react-icons/hi';
 
+// --- 2. SOUS-COMPOSANT : CARTE DE STATISTIQUE ---
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white overflow-hidden shadow rounded-lg">
         <div className="p-5">
@@ -22,11 +24,13 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
     </div>
 );
 
+// --- 3. COMPOSANT DASHBOARD ---
 const Dashboard = () => {
     const [stats, setStats] = useState({ total: 0, byStatus: {} });
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // -- CHARGEMENT DES DONNÉES --
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -49,6 +53,7 @@ const Dashboard = () => {
         fetchData();
     }, []);
 
+    // --- 4. RENDU DE L'INTERFACE ---
     return (
         <div>
             <h1 className="text-2xl font-semibold text-gray-900 mb-6">Dashboard</h1>

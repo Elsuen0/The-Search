@@ -1,13 +1,16 @@
+// --- 1. IMPORTS ---
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
+// --- 2. COMPOSANT FORMULAIRE ---
 const ApplicationForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditMode = !!id;
 
+    // -- ÉTAT DU FORMULAIRE --
     const [formData, setFormData] = useState({
         company: '',
         position: '',
@@ -17,6 +20,7 @@ const ApplicationForm = () => {
         notes: '',
     });
 
+    // -- CHARGEMENT DES DONNÉES (Si Modification) --
     useEffect(() => {
         if (isEditMode) {
             fetchApplication();
@@ -38,6 +42,7 @@ const ApplicationForm = () => {
         }
     };
 
+    // -- GESTION DES ACTIONS --
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -59,6 +64,7 @@ const ApplicationForm = () => {
         }
     };
 
+    // --- 3. RENDU DU FORMULAIRE ---
     return (
         <div className="max-w-2xl mx-auto">
             <h1 className="text-2xl font-semibold text-gray-900 mb-6">
